@@ -12,7 +12,7 @@ computer_name = os.getenv('COMPUTERNAME')
 qinfo.FormatName="direct=os:"+computer_name+"\\PRIVATE$\\123"
 q1info.FormatName = "direct=os:"+computer_name+"\\PRIVATE$\\321"
 rec_q = qinfo.Open(1, 0)
-send_q = qinfo.Open(2, 0)
+send_q = q1info.Open(2, 0)
 
 chinese_id = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\TTS_MS_ZH-CN_HUIHUI_11.0"
 engine = pyttsx3.init()
@@ -67,8 +67,11 @@ class Game:
         msg = rec_q.receive()
         return msg.Body
 
-    def send(self, msg):
-        msg.send(send_q)
+    def send(self, m):
+        msg=win32com.client.Dispatch("MSMQ.MSMQMessage")
+        msg.Label = ""
+        msg.Body = m
+        msg.Send(send_q)
 
 
 class Player:

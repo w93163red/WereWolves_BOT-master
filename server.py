@@ -1,6 +1,14 @@
 from autobahn.twisted.websocket import WebSocketServerProtocol, \
     WebSocketServerFactory
+import win32com.client, os
 
+qinfo = win32com.client.Dispatch("MSMQ.MSMQQueueInfo")
+q1info = win32com.client.Dispatch("MSMQ.MSMQQueueInfo")
+computer_name = os.getenv('COMPUTERNAME')
+qinfo.FormatName="direct=os:"+computer_name+"\\PRIVATE$\\123"
+q1info.FormatName = "direct=os:"+computer_name+"\\PRIVATE$\\321"
+rec_q = qinfo.Open(2, 0)
+send_q = q1info.Open(1, 0)
 
 class MyServerProtocol(WebSocketServerProtocol):
 
@@ -11,13 +19,12 @@ class MyServerProtocol(WebSocketServerProtocol):
         print("WebSocket connection open.")
 
     def onMessage(self, payload, isBinary):
-        if isBinary:
-            print("Binary message received: {0} bytes".format(len(payload)))
-        else:
-            print("Text message received: {0}".format(payload.decode('utf8')))
-
-        # echo back message verbatim
-        self.sendMessage(payload, isBinary)
+        msg = win32com.client.Dispatch("MSMQ.MSMQMessage")
+        msg.Label = ""
+        msg.Body = payload
+        msg.Send(send_q)
+        msg = rec_q.Receive()
+        self.sendMessage(msg, False)
 
     def onClose(self, wasClean, code, reason):
         print("WebSocket connection closed: {0}".format(reason))

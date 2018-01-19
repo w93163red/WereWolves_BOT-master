@@ -37,7 +37,8 @@
 
          function sendText() {
             if (isopen) {
-               socket.send("Hello, world!");
+               var str = document.getElementsByName("fname")[0].value;
+               socket.send(str);
                console.log("Text message sent.");
             } else {
                console.log("Connection not opened.")
@@ -58,7 +59,7 @@
       </script>
    </head>
    <body>
-      <p>Open your browser's JavaScript console to see what's happening (hit F12).</p>
+      <input type="text" name="fname" />
       <button onclick='sendText();'>Send Text Message</button>
       <button onclick='sendBinary();'>Send Binary Message</button>
    </body>
